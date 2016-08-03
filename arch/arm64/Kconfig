@@ -1469,6 +1469,8 @@ endif
 
 source "lib/Kconfig"
 
+source "techpack/Kconfig"
+
 menu "Asus configuration options"
 
 config MACH_ASUS
