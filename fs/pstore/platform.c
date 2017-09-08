@@ -581,6 +581,7 @@ static void pstore_dump(struct kmsg_dumper *dumper,
 
 static struct kmsg_dumper pstore_dumper = {
 	.dump = pstore_dump,
+	.name = "pstore_ramoops",
 };
 
 /*
