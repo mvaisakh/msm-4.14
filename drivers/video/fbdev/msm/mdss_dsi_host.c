@@ -1132,10 +1132,21 @@ static int mdss_dsi_read_status(struct mdss_dsi_ctrl_pdata *ctrl)
 	int start = 0;
 	struct dcs_cmd_req cmdreq;
 
+#ifdef CONFIG_MACH_ASUS_SDM660
+	int times = 0;
+
+	*ctrl->status_buf.data = 0;
+#endif
 	rc = 1;
 	lenp = ctrl->status_valid_params ?: ctrl->status_cmds_rlen;
 
 	for (i = 0; i < ctrl->status_cmds.cmd_cnt; ++i) {
+
+#ifdef CONFIG_MACH_ASUS_SDM660
+		while (times < 2 && ((*ctrl->status_buf.data) != 0x0c) &&
+			((*ctrl->status_buf.data) != 0x9c) &&
+			((*ctrl->status_buf.data) != 0x98)) {
+#endif
 		memset(&cmdreq, 0, sizeof(cmdreq));
 		cmdreq.cmds = ctrl->status_cmds.cmds + i;
 		cmdreq.cmds_cnt = 1;
@@ -1150,6 +1161,10 @@ static int mdss_dsi_read_status(struct mdss_dsi_ctrl_pdata *ctrl)
 			cmdreq.flags |= CMD_REQ_HS_MODE;
 
 		rc = mdss_dsi_cmdlist_put(ctrl, &cmdreq);
+#ifdef CONFIG_MACH_ASUS_SDM660
+		times++;
+		}
+#endif
 		if (rc <= 0) {
 			pr_err("%s: get status: fail\n", __func__);
 			return rc;

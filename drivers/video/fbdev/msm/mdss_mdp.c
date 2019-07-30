@@ -107,7 +107,11 @@ static struct mdss_panel_intf pan_types[] = {
 	{"hdmi", MDSS_PANEL_INTF_HDMI},
 	{"rgb", MDSS_PANEL_INTF_RGB},
 };
-static char mdss_mdp_panel[MDSS_MAX_PANEL_LEN];
+
+#ifndef CONFIG_MACH_ASUS_SDM660
+static
+#endif
+char mdss_mdp_panel[MDSS_MAX_PANEL_LEN];
 
 struct mdss_hw mdss_mdp_hw = {
 	.hw_ndx = MDSS_HW_MDP,
@@ -5362,6 +5366,9 @@ static int __init mdss_mdp_driver_init(void)
 	return 0;
 
 }
+#ifdef CONFIG_MACH_ASUS_SDM660
+EXPORT_SYMBOL(mdss_mdp_panel);
+#endif
 
 module_param_string(panel, mdss_mdp_panel, MDSS_MAX_PANEL_LEN, 0600);
 /*
@@ -5379,6 +5386,7 @@ module_param_string(panel, mdss_mdp_panel, MDSS_MAX_PANEL_LEN, 0600);
  * panel selected by <pan_intf_cfg>
  */
 MODULE_PARM_DESC(panel, "lk supplied panel selection string");
+
 MODULE_PARM_DESC(panel,
 	"panel=<lk_cfg>:<pan_intf>:<pan_intf_cfg>:<panel_topology_cfg>");
 module_init(mdss_mdp_driver_init);
