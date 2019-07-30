@@ -695,6 +695,20 @@
 #define KEY_FP_GESTURE_LONG_PRESS	0x2ec
 #define KEY_FP_GESTURE_TAP		0x2ed
 
+#ifdef CONFIG_MACH_ASUS_SDM660
+
+#if defined(CONFIG_TOUCHSCREEN_NT36xxx) || defined(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_v27) || defined(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX)
+#define KEY_TP_GESTURE_W 	0x2ec
+#define KEY_TP_GESTURE_E 	0x2ed
+#define KEY_TP_GESTURE_S 	0x2ee
+#define KEY_TP_GESTURE_Z 	0x2ef
+#define KEY_TP_GESTURE_C 	0x2f0
+#define KEY_TP_GESTURE_V 	0x2f1
+#define KEY_TP_GESTURE_SWIPE_UP 	0x2F6
+#define KEY_TP_GESTURE_DOUBLE_CLICK 	0x2F7
+#endif
+#endif
+
 /* We avoid low common keys in module aliases so they don't get huge. */
 #define KEY_MIN_INTERESTING	KEY_MUTE
 #define KEY_MAX			0x2ff
