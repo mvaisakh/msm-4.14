@@ -584,8 +584,8 @@ static int __init sensors_init(void)
 #else
 	sensors_class->dev_attrs = sensors_class_attrs;
 	return 0;
+#endif
 }
-
 static void __exit sensors_exit(void)
 {
 	class_destroy(sensors_class);
