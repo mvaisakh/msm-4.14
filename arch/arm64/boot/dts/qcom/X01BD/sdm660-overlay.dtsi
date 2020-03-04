@@ -2,10 +2,15 @@
 
 / {
 	reserved-memory {
-		pstore_reserve_mem: pstore_reserve_mem_region@0 {
+		ramoops {
+			compatible = "removed-dma-pool", "ramoops";
+			no-map;
+			reg = <0x0 0xA0000000 0x0 0x00400000>;
+			status = "ok";
+			console-size = <0x200000>;
+			pmsg-size = <0x200000>;
 			linux,reserve-contiguous-region;
 			linux,reserve-region;
-			reg = <0x0 0x9ff00000 0x0 0x00100000>;
 			label = "pstore_reserve_mem";
 		};
 	};
