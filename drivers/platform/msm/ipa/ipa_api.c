@@ -355,6 +355,24 @@ u8 *ipa_pad_to_32(u8 *dest)
 	return dest;
 }
 
+/**
+ * ipa2_pad_to_32() - pad byte array to 32 bit value
+ * @dest: byte array
+ *
+ * Return value: padded value
+ */
+u8 *ipa2_pad_to_32(u8 *dest)
+{
+	int i = (long)dest & 0x3;
+	int j;
+
+	if (i)
+		for (j = 0; j < (4 - i); j++)
+			*dest++ = 0;
+
+	return dest;
+}
+
 int ipa_smmu_store_sgt(struct sg_table **out_ch_ptr,
 	struct sg_table *in_sgt_ptr)
 {
@@ -3588,6 +3606,39 @@ int ipa_disable_wdi_pipes(int ipa_ep_idx_tx, int ipa_ep_idx_rx)
 
 	return ret;
 }
+
+
+/**
+ * ipa_add_socksv5_conn()- Add socksv5 entry in IPA
+ *
+ * Return value: 0 on success, negative otherwise
+ */
+int ipa_add_socksv5_conn(struct ipa_socksv5_info *info)
+{
+	int ret;
+
+	IPA_API_DISPATCH_RETURN(ipa_add_socksv5_conn, info);
+
+	return ret;
+}
+EXPORT_SYMBOL(ipa_add_socksv5_conn);
+
+
+/**
+ * ipa_del_socksv5_conn()- Del socksv5 entry in IPA
+ *
+ * Return value: 0 on success, negative otherwise
+ */
+int ipa_del_socksv5_conn(uint32_t handle)
+{
+	int ret;
+
+	IPA_API_DISPATCH_RETURN(ipa_del_socksv5_conn, handle);
+
+	return ret;
+}
+EXPORT_SYMBOL(ipa_del_socksv5_conn);
+
 
 /**
  * ipa_get_lan_rx_napi() - returns if NAPI is enabled in LAN RX
