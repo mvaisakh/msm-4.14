@@ -1093,6 +1093,8 @@ fb_blank(struct fb_info *info, int blank)
 }
 EXPORT_SYMBOL(fb_blank);
 
+bool lcd_suspend_flag = false;
+
 static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 			unsigned long arg, struct file *file)
 {
@@ -1138,6 +1140,10 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 			return -ENODEV;
 		}
 		info->flags |= FBINFO_MISC_USEREVENT;
+		if (arg == FB_BLANK_POWERDOWN) {
+			lcd_suspend_flag = true;
+			printk("[Display] FB_BLANK_POWERDOWN\n");
+		}
 		ret = fb_set_var(info, &var);
 		info->flags &= ~FBINFO_MISC_USEREVENT;
 		unlock_fb_info(info);
