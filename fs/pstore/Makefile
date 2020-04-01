@@ -3,6 +3,8 @@
 # Makefile for the linux pstorefs routines.
 #
 
+ccflags-y := -DDEBUG
+
 obj-$(CONFIG_PSTORE) += pstore.o
 
 pstore-objs += inode.o platform.o
