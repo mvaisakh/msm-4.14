@@ -29,11 +29,16 @@
 #include "mdss_dsi.h"
 #include "mdss_dba_utils.h"
 #include "mdss_debug.h"
+#include "mdss_panel.h"
 
 #define DT_CMD_HDR 6
 #define DEFAULT_MDP_TRANSFER_TIME 14000
 
 #define VSYNC_DELAY msecs_to_jiffies(17)
+
+extern char mdss_mdp_panel[MDSS_MAX_PANEL_LEN];
+extern bool shutdown_flag;
+
 #ifndef CONFIG_BACKLIGHT_QCOM_SPMI_WLED
 DEFINE_LED_TRIGGER(bl_led_trigger);
 #endif
@@ -186,7 +191,7 @@ static void mdss_dsi_panel_apply_settings(struct mdss_dsi_ctrl_pdata *ctrl,
 }
 
 
-static void mdss_dsi_panel_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,
+void mdss_dsi_panel_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,
 			struct dsi_panel_cmds *pcmds, u32 flags)
 {
 	struct dcs_cmd_req cmdreq;
@@ -502,7 +507,15 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 			gpio_set_value((ctrl_pdata->disp_en_gpio), 0);
 			gpio_free(ctrl_pdata->disp_en_gpio);
 		}
-		gpio_set_value((ctrl_pdata->rst_gpio), 0);
+		if(shutdown_flag) {
+			gpio_set_value((ctrl_pdata->rst_gpio), 0);
+			rc = gpio_request_one(ctrl_pdata->tp_rst_gpio, GPIOF_OUT_INIT_LOW, "himax-tp-rst");
+			if (rc) {
+				pr_err("%s:Failed to request NVT-tp-rst GPIO\n", __func__);
+				gpio_free(ctrl_pdata->tp_rst_gpio);
+				gpio_request_one(ctrl_pdata->tp_rst_gpio, GPIOF_OUT_INIT_LOW, "himax-tp-rst");
+			}
+		}
 		gpio_free(ctrl_pdata->rst_gpio);
 		if (gpio_is_valid(ctrl_pdata->lcd_mode_sel_gpio)) {
 			gpio_set_value(ctrl_pdata->lcd_mode_sel_gpio, 0);
@@ -1821,8 +1834,9 @@ static bool mdss_dsi_cmp_panel_reg_v2(struct mdss_dsi_ctrl_pdata *ctrl)
 			MDSS_XLOG(ctrl->ndx, ctrl->return_buf[i],
 					ctrl->status_value[group + i]);
 			if (ctrl->return_buf[i] !=
-				ctrl->status_value[group + i])
+				ctrl->status_value[group + i]){
 				break;
+			}
 		}
 
 		if (i == len)
@@ -2038,6 +2052,11 @@ static void mdss_dsi_parse_esd_params(struct device_node *np,
 
 	pinfo->esd_check_enabled = of_property_read_bool(np,
 		"qcom,esd-check-enabled");
+
+	if(strstr(mdss_mdp_panel, "esd_disabled")) {
+		pr_err("qimk no panel no esd\n");
+		pinfo->esd_check_enabled = 0;
+	}
 
 	if (!pinfo->esd_check_enabled)
 		return;
@@ -2968,6 +2987,9 @@ static int mdss_panel_parse_dt(struct device_node *np,
 
 	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->off_cmds,
 		"qcom,mdss-dsi-off-command", "qcom,mdss-dsi-off-command-state");
+
+	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->esd_recover_cmds,
+		"qcom,mdss-dsi-esd-recover-command", "qcom,mdss-dsi-esd-recover-command-state");
 
 	rc = of_property_read_u32(np, "qcom,adjust-timer-wakeup-ms", &tmp);
 	pinfo->adjust_timer_delay_ms = (!rc ? tmp : 0);

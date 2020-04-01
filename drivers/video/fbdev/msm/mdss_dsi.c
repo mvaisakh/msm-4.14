@@ -36,6 +36,8 @@
 
 #define CMDLINE_DSI_CTL_NUM_STRING_LEN 2
 
+extern char mdss_mdp_panel[MDSS_MAX_PANEL_LEN];
+
 /* Master structure to hold all the information about the DSI/panel */
 static struct mdss_dsi_data *mdss_dsi_res;
 
@@ -362,6 +364,8 @@ static int mdss_dsi_regulator_init(struct platform_device *pdev,
 	return rc;
 }
 
+extern void mdss_dsi_panel_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,struct dsi_panel_cmds *pcmds, u32 flags);
+
 static int mdss_dsi_panel_power_off(struct mdss_panel_data *pdata)
 {
 	int ret = 0;
@@ -385,13 +389,15 @@ static int mdss_dsi_panel_power_off(struct mdss_panel_data *pdata)
 	if (mdss_dsi_pinctrl_set_state(ctrl_pdata, false))
 		pr_debug("reset disable: pinctrl not enabled\n");
 
-	ret = msm_dss_enable_vreg(
-		ctrl_pdata->panel_power_data.vreg_config,
-		ctrl_pdata->panel_power_data.num_vreg, 0);
-	if (ret)
-		pr_err("%s: failed to disable vregs for %s\n",
-			__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));
-
+	mdelay(5);
+	if(strstr(mdss_mdp_panel,"qcom,mdss_dsi_td4310_1080p_video_txd") == NULL ) {
+		ret = msm_dss_enable_vreg(
+			ctrl_pdata->panel_power_data.vreg_config,
+			ctrl_pdata->panel_power_data.num_vreg, 0);
+		if (ret)
+			pr_err("%s: failed to disable vregs for %s\n",
+				__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));
+	}
 end:
 	return ret;
 }
@@ -1317,6 +1323,8 @@ static int mdss_dsi_off(struct mdss_panel_data *pdata, int power_state)
 		goto panel_power_ctrl;
 	}
 
+	ret = mdss_dsi_panel_power_ctrl(pdata, power_state);
+
 	/*
 	 * Link clocks should be turned off before PHY can be disabled.
 	 * For command mode panels, all clocks are turned off prior to reaching
@@ -1344,11 +1352,6 @@ static int mdss_dsi_off(struct mdss_panel_data *pdata, int power_state)
 			  MDSS_DSI_CORE_CLK, MDSS_DSI_CLK_OFF);
 
 panel_power_ctrl:
-	ret = mdss_dsi_panel_power_ctrl(pdata, power_state);
-	if (ret) {
-		pr_err("%s: Panel power off failed\n", __func__);
-		goto end;
-	}
 
 	if (panel_info->dynamic_fps
 	    && (panel_info->dfps_update == DFPS_SUSPEND_RESUME_MODE)
@@ -3167,6 +3170,9 @@ static struct device_node *mdss_dsi_pref_prim_panel(
  *
  * returns pointer to panel node on success, NULL on error.
  */
+
+int nvt_tp_check = 0;
+
 static struct device_node *mdss_dsi_find_panel_of_node(
 		struct platform_device *pdev, char *panel_cfg)
 {
@@ -3233,6 +3239,10 @@ static struct device_node *mdss_dsi_find_panel_of_node(
 		}
 		pr_info("%s: cmdline:%s panel_name:%s\n",
 			__func__, panel_cfg, panel_name);
+		if (!strcmp(panel_name,"qcom,mdss_dsi_nt36672_1080p_video"))
+			nvt_tp_check = 0;
+		else if (!strcmp(panel_name,"qcom,mdss_dsi_nt36672_1080p_video_txd"))
+			nvt_tp_check = 1;
 		if (!strcmp(panel_name, NONE_PANEL))
 			goto exit;
 
@@ -4529,6 +4539,12 @@ static int mdss_dsi_parse_gpio_params(struct platform_device *ctrl_pdev,
 		pr_err("%s:%d, TE gpio not specified\n",
 						__func__, __LINE__);
 	pdata->panel_te_gpio = ctrl_pdata->disp_te_gpio;
+
+	ctrl_pdata->tp_rst_gpio = of_get_named_gpio(ctrl_pdev->dev.of_node,
+			 "qcom,platform-tp-reset-gpio", 0);
+	if (!gpio_is_valid(ctrl_pdata->tp_rst_gpio))
+		pr_err("%s:%d, tp reset gpio  %d not specified\n",
+						__func__, __LINE__,ctrl_pdata->tp_rst_gpio);
 
 	ctrl_pdata->bklt_en_gpio = of_get_named_gpio(ctrl_pdev->dev.of_node,
 		"qcom,platform-bklight-en-gpio", 0);
