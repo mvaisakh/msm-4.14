@@ -5,10 +5,8 @@ config SENSORS_SSC
 	  This driver is used for exercising sensors use case,
 	  time syncing with ADSP clock.
 
-config SENSORS_CLASS
-	bool "Sensors Class Support"
+config INPUT_STK3335
+	tristate "STK STK3335 alsps sensor"
+	depends on I2C
 	help
-	  This option enables the sensor sysfs class in /sys/class/sensors.
-	  You'll need this to do anything useful with sensors.
-
-	  If unsure, say N.
+	  Say Y here to enable the STK3335 ALSPS Sensor.
