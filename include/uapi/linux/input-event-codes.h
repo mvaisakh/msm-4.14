@@ -858,4 +858,26 @@
 #define SND_MAX			0x07
 #define SND_CNT			(SND_MAX+1)
 
+/*
+* Asus Touchscreen Gestures
+*/
+#define KEY_TP_GESTURE_SWIPE_UP 	0x2F6
+#define KEY_TP_GESTURE_DOUBLE_CLICK 	0x2F7
+#define KEY_TP_GESTURE_C 		0x2F0
+#define KEY_TP_GESTURE_E 		0x2ED
+#define KEY_TP_GESTURE_S 		0x2EE
+#define KEY_TP_GESTURE_V 		0x2F1
+#define KEY_TP_GESTURE_W 		0x2EC
+#define KEY_TP_GESTURE_Z 		0x2EF
+/*
+* Asus Fingerprint Gestures
+*/
+#define FP_KEY_UP			0x258
+#define FP_KEY_DOWN		0x259
+#define FP_KEY_LEFT		0x25a
+#define FP_KEY_RIGHT		0x25b
+#define FP_KEY_CLICK		0x25c
+#define FP_KEY_DOUBLE_CLICK		0x25d
+#define FP_KEY_LONG_PRESS          0x25e
+
 #endif
