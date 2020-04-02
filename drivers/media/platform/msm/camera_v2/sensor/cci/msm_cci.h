@@ -157,6 +157,7 @@ struct cci_device {
 	uint32_t hw_version;
 	uint8_t ref_count;
 	enum msm_cci_state_t cci_state;
+	struct mutex mutex; 
 	size_t num_clk;
 	size_t num_clk_cases;
 	struct clk **cci_clk;
