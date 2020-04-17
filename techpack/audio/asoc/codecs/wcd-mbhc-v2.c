@@ -34,9 +34,18 @@
 #include "wcd-mbhc-adc.h"
 #include "wcd-mbhc-v2-api.h"
 
+static int hph_state = 0;
+bool wcd_swch_level_remove(struct wcd_mbhc *mbhc);
+
 void wcd_mbhc_jack_report(struct wcd_mbhc *mbhc,
 			  struct snd_soc_jack *jack, int status, int mask)
 {
+	pr_warn("%s:%x,%x",__func__,status,mask);
+	if((status == 0x9 && mask == 0x3cf) || (status == 0xb && mask == 0x3cf)) {
+		hph_state = 1;
+	} else {
+		hph_state = 0;
+	}
 	snd_soc_jack_report(jack, status, mask);
 }
 EXPORT_SYMBOL(wcd_mbhc_jack_report);
@@ -344,7 +353,7 @@ out_micb_en:
 		if (micbias2)
 			/* Disable cs, pullup & enable micbias */
 			wcd_enable_curr_micbias(mbhc, WCD_MBHC_EN_MB);
-		else
+		else if(!wcd_swch_level_remove(mbhc))
 			/* Disable micbias, pullup & enable cs */
 			wcd_enable_curr_micbias(mbhc, WCD_MBHC_EN_CS);
 		mutex_unlock(&mbhc->hphr_pa_lock);
@@ -356,7 +365,7 @@ out_micb_en:
 		if (micbias2)
 			/* Disable cs, pullup & enable micbias */
 			wcd_enable_curr_micbias(mbhc, WCD_MBHC_EN_MB);
-		else
+		else if(!wcd_swch_level_remove(mbhc))
 			/* Disable micbias, enable pullup & cs */
 			wcd_enable_curr_micbias(mbhc, WCD_MBHC_EN_PULLUP);
 		break;
@@ -366,7 +375,7 @@ out_micb_en:
 		if (micbias2)
 			/* Disable cs, pullup & enable micbias */
 			wcd_enable_curr_micbias(mbhc, WCD_MBHC_EN_MB);
-		else
+		else if(!wcd_swch_level_remove(mbhc))
 			/* Disable micbias, enable pullup & cs */
 			wcd_enable_curr_micbias(mbhc, WCD_MBHC_EN_PULLUP);
 		break;
@@ -820,7 +829,7 @@ void wcd_mbhc_find_plug_and_report(struct wcd_mbhc *mbhc,
 			wcd_mbhc_report_plug(mbhc, 0, SND_JACK_HEADPHONE);
 		if (mbhc->current_plug == MBHC_PLUG_TYPE_HEADSET)
 			wcd_mbhc_report_plug(mbhc, 0, SND_JACK_HEADSET);
-		wcd_mbhc_report_plug(mbhc, 1, SND_JACK_UNSUPPORTED);
+		wcd_mbhc_report_plug(mbhc, 1, SND_JACK_HEADSET);
 	} else if (plug_type == MBHC_PLUG_TYPE_HEADSET) {
 		if (mbhc->mbhc_cfg->enable_anc_mic_detect &&
 		    mbhc->mbhc_fn->wcd_mbhc_detect_anc_plug_type)
@@ -1710,6 +1719,16 @@ void wcd_mbhc_stop(struct wcd_mbhc *mbhc)
 }
 EXPORT_SYMBOL(wcd_mbhc_stop);
 
+static ssize_t show_hp_state(struct device *dev,struct device_attribute *attr, char *buf)
+{
+	int ret = 0;
+
+	ret = snprintf(buf, sizeof(int), "%d\n",hph_state);
+	return ret;
+}
+
+static DEVICE_ATTR(hp_state, S_IRUGO, show_hp_state,NULL);
+
 /*
  * wcd_mbhc_init : initialize MBHC internal structures.
  *
@@ -1722,6 +1741,7 @@ int wcd_mbhc_init(struct wcd_mbhc *mbhc, struct snd_soc_codec *codec,
 		      bool impedance_det_en)
 {
 	int ret = 0;
+	int ret_hp =0;
 	int hph_swh = 0;
 	int gnd_swh = 0;
 	u32 hph_moist_config[3];
@@ -1956,6 +1976,8 @@ int wcd_mbhc_init(struct wcd_mbhc *mbhc, struct snd_soc_codec *codec,
 		       mbhc->intr_ids->hph_right_ocp);
 		goto err_hphr_ocp_irq;
 	}
+
+	ret_hp = sysfs_create_file(&card->dev->kobj,&dev_attr_hp_state.attr);
 
 	mbhc->deinit_in_progress = false;
 	pr_debug("%s: leave ret %d\n", __func__, ret);
