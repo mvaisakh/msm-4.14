@@ -1209,7 +1209,7 @@ static void nvt_ts_work_func(struct work_struct *work)
 
 	mutex_lock(&ts->lock);
 
-	ret = CTP_I2C_READ(ts->client, I2C_FW_Address, point_data, POINT_DATA_LEN + 1);
+	ret = 1;
 	if (ret < 0) {
 		NVT_ERR("CTP_I2C_READ failed.(%d)\n", ret);
 		goto XFER_ERROR;
