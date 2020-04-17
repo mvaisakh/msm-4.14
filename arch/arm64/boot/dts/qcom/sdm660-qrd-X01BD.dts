@@ -201,3 +201,10 @@
 		stk,transmittance = <1100>;
 	};
 };
+
+&soc {
+	qcom,lpass@15700000 {
+		status = "ok";
+		qcom,pil-force-shutdown;
+	};
+};
