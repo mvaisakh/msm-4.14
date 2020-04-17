@@ -162,6 +162,7 @@ endif
 ifdef CONFIG_SND_SOC_WCD_IRQ
 	CORE_OBJS += wcd-irq.o
 endif
+	
 
 LINUX_INC +=	-Iinclude/linux
 
@@ -245,3 +246,5 @@ mbhc_dlkm-y := $(MBHC_OBJS)
 
 obj-$(CONFIG_SND_SOC_MSM_HDMI_CODEC_RX) += hdmi_dlkm.o
 hdmi_dlkm-y := $(HDMICODEC_OBJS)
+
+obj-$(CONFIG_SND_SOC_AW87339) += aw87339_audio_spk.o
