@@ -2182,7 +2182,6 @@
 				<&modem_smp2p_in 7 0>;
 
 		interrupt-names = "qcom,wdog",
-				"qcom,err-fatal",
 				"qcom,proxy-unvote",
 				"qcom,err-ready",
 				"qcom,stop-ack",
