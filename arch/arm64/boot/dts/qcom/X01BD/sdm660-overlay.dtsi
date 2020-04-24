@@ -2,16 +2,17 @@
 
 / {
 	reserved-memory {
-		ramoops {
+		ramoops_mem: ramoops_mem_region  {
 			compatible = "removed-dma-pool", "ramoops";
 			no-map;
 			reg = <0x0 0x9ff00000 0x0 0x00100000>;
 			status = "ok";
-			console-size = <0x200000>;
-			pmsg-size = <0x200000>;
+			console-size = <0x60000>;
+			pmsg-size = <0x60000>;
+			record-size = <0x40000>;
 			linux,reserve-contiguous-region;
 			linux,reserve-region;
-			label = "pstore_reserve_mem";
+			label = "ramoops_mem";
 		};
 	};
 };
@@ -60,5 +61,18 @@
 			gpio-key,wakeup;
 			debounce-interval = <15>;
 		};
+	};
+
+	ramoops {
+		compatible = "ramoops";
+		status = "ok";
+
+		android,ramoops-buffer-start = <0x9ff00000>;
+		android,ramoops-buffer-size = <0x00100000>;
+		android,ramoops-console-size = <0x60000>;
+		android,ramoops-record-size = <0x40000>;
+		android,ramoops-dump-oops = <0x1>;
+
+		linux,contiguous-region = <&ramoops_mem>;
 	};
 };
