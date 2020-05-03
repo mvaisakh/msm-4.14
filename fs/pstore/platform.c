@@ -525,7 +525,6 @@ static void pstore_dump(struct kmsg_dumper *dumper,
 		int zipped_len = -1;
 		size_t dump_size;
 		struct pstore_record record;
-		big_oops_buf = NULL;
 
 		pstore_record_init(&record, psinfo);
 		record.type = PSTORE_TYPE_DMESG;

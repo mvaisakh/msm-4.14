@@ -16,9 +16,9 @@
 #include "sdm660.dtsi"
 #include "sdm660-qrd.dtsi"
 #include "sdm660-internal-codec.dtsi"
-
 #include "X01BD/overlay.dtsi"
 #include "X01BD/sdm660-qrd-overlay.dtsi"
+#include "msm-audio.dtsi"
 #include "X01BD/sdm660-internal-codec-overlay.dtsi"
 
 / {
@@ -207,4 +207,6 @@
 		status = "ok";
 		qcom,pil-force-shutdown;
 	};
+	/delete-node/ sound-9335;
 };
+
