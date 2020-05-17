@@ -147,6 +147,9 @@
 		pinctrl-1 = <&dist_cam_active>;
 		pinctrl-2 = <&dist_mem1_active>;
 	};
+	qcom,sps {
+		status = "ok";
+	};
 };
 
 &slim_aud {
@@ -200,4 +203,8 @@
 		stk,ps-thdl = <1500>;
 		stk,transmittance = <1100>;
 	};
+};
+
+&i2c_4 {
+	qcom,disable-dma;
 };
