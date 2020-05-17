@@ -147,8 +147,8 @@
 		pinctrl-1 = <&dist_cam_active>;
 		pinctrl-2 = <&dist_mem1_active>;
 	};
-	qcom,sps {
-		status = "ok";
+	mdss_dp_ctrl {
+		/delete-property/ qcom,dp-usbpd-detection;
 	};
 };
 
